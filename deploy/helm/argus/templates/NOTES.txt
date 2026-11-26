@@ -1,0 +1,28 @@
+Argus {{ .Chart.AppVersion }} installed in namespace {{ .Release.Namespace }}.
+
+Dashboard:
+{{- if and (eq .Values.hub.service.type "NodePort") .Values.hub.service.nodePort }}
+  http://<any node IP>:{{ .Values.hub.service.nodePort }}
+{{- else }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "argus.hubName" . }} {{ .Values.hub.port }}:{{ .Values.hub.port }}
+  then open http://127.0.0.1:{{ .Values.hub.port }}
+{{- end }}
+
+Login:
+  email:    {{ .Values.auth.adminEmail }}
+  password: kubectl -n {{ .Release.Namespace }} get secret {{ include "argus.secretName" . }} -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d; echo
+
+Agents register themselves (one per node) with the token in the same Secret.
+
+Check the rollout:
+  kubectl -n {{ .Release.Namespace }} get pods -o wide
+{{- if .Values.hub.persistence.enabled }}
+
+If the hub Pod stays Pending with "unbound immediate PersistentVolumeClaims", the cluster has
+no default StorageClass. Check `kubectl get storageclass`, install one (for example
+local-path-provisioner), or reinstall with --set hub.persistence.enabled=false.
+{{- else }}
+
+WARNING: hub.persistence.enabled=false. Accounts and the incident history are kept inside the
+hub Pod and are lost whenever it restarts. Enable persistence for anything you want to keep.
+{{- end }}

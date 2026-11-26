@@ -1,0 +1,128 @@
+{{- if and .Values.hub.persistence.enabled (not .Values.hub.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "argus.hubName" . }}
+  labels:
+    {{- include "argus.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  {{- with .Values.hub.persistence.storageClass }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.hub.persistence.size }}
+---
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "argus.hubName" . }}
+  labels:
+    {{- include "argus.labels" . | nindent 4 }}
+    app.kubernetes.io/component: hub
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "argus.selector" . | nindent 6 }}
+      app.kubernetes.io/component: hub
+  template:
+    metadata:
+      labels:
+        {{- include "argus.labels" . | nindent 8 }}
+        app.kubernetes.io/component: hub
+    spec:
+      serviceAccountName: {{ include "argus.hubName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: hub
+          image: "{{ .Values.image.hub.repository }}:{{ .Values.image.hub.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.hub.port }}
+          env:
+            - name: USER_EMAIL
+              valueFrom: { secretKeyRef: { name: {{ include "argus.secretName" . }}, key: ADMIN_EMAIL } }
+            - name: USER_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "argus.secretName" . }}, key: ADMIN_PASSWORD } }
+            - name: AGENT_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ include "argus.secretName" . }}, key: AGENT_TOKEN } }
+            - name: CLUSTER_NAME
+              value: {{ .Values.clusterName | default .Release.Name | quote }}
+            {{- if and .Values.podProbe.enabled .Values.podProbe.pairs }}
+            - name: POD_PROBES
+              value: {{ join "," .Values.podProbe.pairs | quote }}
+            {{- end }}
+            - name: CLUSTER_DOMAIN
+              value: {{ .Values.clusterDomain | quote }}
+            - name: DISABLE_SSH
+              value: "true"
+          readinessProbe:
+            httpGet: { path: /api/health, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          resources:
+            {{- toYaml .Values.hub.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: data
+          {{- if .Values.hub.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.hub.persistence.existingClaim | default (include "argus.hubName" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.hub.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hub.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hub.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "argus.hubName" . }}
+  labels:
+    {{- include "argus.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.hub.service.type }}
+  selector:
+    {{- include "argus.selector" . | nindent 4 }}
+    app.kubernetes.io/component: hub
+  ports:
+    - name: http
+      port: {{ .Values.hub.port }}
+      targetPort: http
+      {{- if and (eq .Values.hub.service.type "NodePort") .Values.hub.service.nodePort }}
+      nodePort: {{ .Values.hub.service.nodePort }}
+      {{- end }}

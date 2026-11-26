@@ -1,0 +1,277 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"runtime"
+	"strings"
+	"time"
+
+	"argus"
+	"argus/agent"
+	"argus/agent/health"
+	"argus/agent/utils"
+	"github.com/spf13/pflag"
+	"golang.org/x/crypto/ssh"
+)
+
+type noKeyProvidedError struct{}
+
+func (noKeyProvidedError) Error() string {
+	return "no key provided: must set -key flag, KEY env var, or KEY_FILE env var. Use 'argus-agent help' for usage"
+}
+
+// parseKeyOrFile parses inline SSH public key material, falling back to
+// reading it as a file when inline parsing fails.
+func parseKeyOrFile(value string) ([]ssh.PublicKey, error) {
+	keys, parseErr := agent.ParseKeys(value)
+	if parseErr == nil {
+		return keys, nil
+	}
+
+	data, readErr := os.ReadFile(value)
+	if readErr != nil {
+		return nil, fmt.Errorf("invalid inline key or unreadable key file: %w", errors.Join(parseErr, readErr))
+	}
+
+	keys, err := agent.ParseKeys(string(data))
+	if err != nil {
+		return nil, fmt.Errorf("invalid key file %q: %w", value, err)
+	}
+	return keys, nil
+}
+
+// cli options
+type cmdOptions struct {
+	key    string // key is the public key(s) for SSH authentication.
+	listen string // listen is the address or port to listen on.
+	hubURL string // hubURL is the URL of the Argus hub.
+	token  string // token is the token to use for authentication.
+}
+
+// parse parses the command line flags and populates the config struct.
+// It returns true if a subcommand was handled and the program should exit.
+func (opts *cmdOptions) parse() bool {
+	subcommand := ""
+	if len(os.Args) > 1 {
+		subcommand = os.Args[1]
+	}
+
+	// Subcommands that don't require any pflag parsing
+	switch subcommand {
+	case "health":
+		err := health.Check()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print("ok")
+		return true
+	case "fingerprint":
+		handleFingerprint()
+		return true
+	}
+
+	// pflag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
+	pflag.StringVarP(&opts.key, "key", "k", "", "Public key(s) for SSH authentication: inline key material or path to a key file")
+	pflag.StringVarP(&opts.listen, "listen", "l", "", "Address or port to listen on")
+	pflag.StringVarP(&opts.hubURL, "url", "u", "", "URL of the Argus hub")
+	pflag.StringVarP(&opts.token, "token", "t", "", "Token to use for authentication")
+	version := pflag.BoolP("version", "v", false, "Show version information")
+	help := pflag.BoolP("help", "h", false, "Show this help message")
+
+	// Convert old single-dash long flags to double-dash for backward compatibility
+	flagsToConvert := []string{"key", "listen", "url", "token"}
+	for i, arg := range os.Args {
+		for _, flag := range flagsToConvert {
+			singleDash := "-" + flag
+			doubleDash := "--" + flag
+			if arg == singleDash {
+				os.Args[i] = doubleDash
+				break
+			} else if strings.HasPrefix(arg, singleDash+"=") {
+				os.Args[i] = doubleDash + arg[len(singleDash):]
+				break
+			}
+		}
+	}
+
+	pflag.Usage = func() {
+		builder := strings.Builder{}
+		builder.WriteString("Usage: ")
+		builder.WriteString(os.Args[0])
+		builder.WriteString(" [command] [flags]\n")
+		builder.WriteString("\nCommands:\n")
+		builder.WriteString("  fingerprint  View or reset the agent fingerprint\n")
+		builder.WriteString("  health       Check if the agent is running\n")
+		builder.WriteString("\nFlags:\n")
+		fmt.Print(builder.String())
+		pflag.PrintDefaults()
+	}
+
+	// Parse all arguments with pflag
+	pflag.Parse()
+
+	// Must run after pflag.Parse()
+	switch {
+	case *version:
+		fmt.Println(argus.AppName+"-agent", argus.Version)
+		return true
+	case *help || subcommand == "help":
+		pflag.Usage()
+		return true
+	}
+
+	// Set environment variables from CLI flags (if provided)
+	if opts.hubURL != "" {
+		os.Setenv("HUB_URL", opts.hubURL)
+	}
+	if opts.token != "" {
+		os.Setenv("TOKEN", opts.token)
+	}
+	return false
+}
+
+// loadPublicKeys loads the public keys from the command line flag, environment variable, or key file.
+func (opts *cmdOptions) loadPublicKeys() ([]ssh.PublicKey, error) {
+	// Try command line flag first
+	if opts.key != "" {
+		return parseKeyOrFile(opts.key)
+	}
+
+	// Try environment variable
+	if key, ok := utils.GetEnv("KEY"); ok && key != "" {
+		return agent.ParseKeys(key)
+	}
+
+	// Try key file
+	keyFile, ok := utils.GetEnv("KEY_FILE")
+	if !ok {
+		// No key configured: fetch the hub's public key from the hub itself.
+		if hubURL, _ := utils.GetEnv("HUB_URL"); hubURL != "" {
+			return fetchHubPublicKey(hubURL)
+		}
+		return nil, noKeyProvidedError{}
+	}
+
+	pubKey, err := os.ReadFile(keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read key file: %w", err)
+	}
+	return agent.ParseKeys(string(pubKey))
+}
+
+func (opts *cmdOptions) getAddress() string {
+	return agent.GetAddress(opts.listen)
+}
+
+func isBenignStartupError(err error, goos string) bool {
+	if goos != "windows" {
+		return false
+	}
+	var noKeyErr noKeyProvidedError
+	return errors.As(err, &noKeyErr)
+}
+
+// handleFingerprint handles the "fingerprint" command with subcommands "view" and "reset".
+func handleFingerprint() {
+	subCmd := ""
+	if len(os.Args) > 2 {
+		subCmd = os.Args[2]
+	}
+
+	switch subCmd {
+	case "", "view":
+		dataDir, _ := agent.GetDataDir()
+		fp := agent.GetFingerprint(dataDir, "", "")
+		fmt.Println(fp)
+	case "help", "-h", "--help":
+		fmt.Print(fingerprintUsage())
+	case "reset":
+		dataDir, err := agent.GetDataDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := agent.DeleteFingerprint(dataDir); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Fingerprint reset. A new one will be generated on next start.")
+	default:
+		log.Fatalf("Unknown command: %q\n\n%s", subCmd, fingerprintUsage())
+	}
+}
+
+func fingerprintUsage() string {
+	return fmt.Sprintf("Usage: %s fingerprint [view|reset]\n\nCommands:\n  view   Print fingerprint (default)\n  reset  Reset saved fingerprint\n", os.Args[0])
+}
+
+func main() {
+	var opts cmdOptions
+	subcommandHandled := opts.parse()
+
+	if subcommandHandled {
+		return
+	}
+
+	var serverConfig agent.ServerOptions
+	var err error
+	serverConfig.Keys, err = opts.loadPublicKeys()
+	if err != nil {
+		if isBenignStartupError(err, runtime.GOOS) {
+			// WinGet launches the executable without configuration during validation.
+			// Exit successfully in that case while retaining the error on other platforms.
+			log.Print("Failed to load public keys:", err)
+			return
+		}
+		log.Fatal("Failed to load public keys:", err)
+	}
+
+	addr := opts.getAddress()
+	serverConfig.Addr = addr
+	serverConfig.Network = agent.GetNetwork(addr)
+
+	a, err := agent.NewAgent()
+	if err != nil {
+		log.Fatal("Failed to create agent: ", err)
+	}
+
+	if err := a.Start(context.Background(), serverConfig); err != nil {
+		log.Fatal("Failed to start: ", err)
+	}
+}
+
+// fetchHubPublicKey retrieves the hub's public key from <hubURL>/api/argus/public-key,
+// retrying while the hub starts. The key is public; trust comes from reaching the
+// hub URL that was configured for this agent.
+func fetchHubPublicKey(hubURL string) ([]ssh.PublicKey, error) {
+	endpoint := strings.TrimRight(hubURL, "/") + "/api/argus/public-key"
+	client := &http.Client{Timeout: 5 * time.Second}
+	var lastErr error
+	for attempt := 0; attempt < 60; attempt++ {
+		if attempt > 0 {
+			time.Sleep(5 * time.Second)
+		}
+		resp, err := client.Get(endpoint)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		var body struct {
+			Key string `json:"key"`
+		}
+		err = json.NewDecoder(io.LimitReader(resp.Body, 1<<16)).Decode(&body)
+		resp.Body.Close()
+		if err != nil || resp.StatusCode != http.StatusOK || body.Key == "" {
+			lastErr = fmt.Errorf("unexpected response from %s (status %d, decode error: %v)", endpoint, resp.StatusCode, err)
+			continue
+		}
+		log.Printf("Fetched hub public key from %s", endpoint)
+		return agent.ParseKeys(body.Key)
+	}
+	return nil, fmt.Errorf("could not fetch hub public key: %w", lastErr)
+}

@@ -1,0 +1,83 @@
+# Images are pulled from Docker Hub. An empty tag means the chart's appVersion, so a chart
+# version always installs the images it was released with. Set repository to use a mirror
+# or your own build (see `make release` in the Makefile).
+image:
+  hub:
+    repository: seoulorigin/argus-hub
+    tag: ""
+  agent:
+    repository: seoulorigin/argus-agent
+    tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# Name shown in the dashboard header. Defaults to the Helm release name.
+clusterName: ""
+# DNS domain of the cluster; agents probe Services as <name>.<namespace>.svc.<clusterDomain>.
+clusterDomain: cluster.local
+
+# Login and agent registration. Empty values are generated on first install and
+# kept on upgrade. Read them back with the command printed by `helm install`.
+auth:
+  adminEmail: admin@argus.local
+  adminPassword: ""
+  agentToken: ""
+  # Use an existing Secret with keys ADMIN_EMAIL, ADMIN_PASSWORD, AGENT_TOKEN instead.
+  existingSecret: ""
+
+hub:
+  # SQLite is the datastore, so the hub is a single replica.
+  port: 8090
+  persistence:
+    # The hub keeps accounts and the incident history in a SQLite file under /data.
+    # true:  the file lives on a PersistentVolumeClaim and survives restarts. The cluster
+    #        needs a default StorageClass (kubeadm clusters have none; k3s has local-path).
+    # false: the file lives in the Pod and is lost when the Pod restarts. Use it to try
+    #        Argus on a cluster without storage.
+    enabled: true
+    size: 2Gi
+    storageClass: ""
+    existingClaim: ""
+  service:
+    type: ClusterIP   # use NodePort to open the dashboard from outside the cluster
+    nodePort: null
+  resources:
+    requests: { cpu: 50m, memory: 96Mi }
+    limits: { memory: 512Mi }
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+agent:
+  # Seconds between collections is fixed at 5 by the hub; nothing to tune here.
+  # The agent only listens on loopback; it connects out to the hub.
+  listen: "127.0.0.1:45876"
+  # Directory on each node that keeps the agent identity (fingerprint) across restarts.
+  stateHostPath: /var/lib/argus-agent
+  resources:
+    requests: { cpu: 20m, memory: 32Mi }
+    limits: { memory: 128Mi }
+  # Run on every node including control-plane nodes.
+  tolerations:
+    - operator: Exists
+  nodeSelector: {}
+  # Extra Linux capabilities for the agent. Reading Pod CPU, memory and traffic needs none.
+  capabilities: []
+  # Extra environment variables for the agent (e.g. NICS to pick interfaces).
+  env: {}
+
+# Pod-to-Service connection checks (find a connection that NetworkPolicy or a bad route cuts
+# between two Pods, while both Services look healthy from the nodes).
+#
+# The agent opens each connection from inside the source Pod's network namespace. That
+# needs SYS_PTRACE and SYS_ADMIN and an unconfined AppArmor profile on the agent, so it is
+# off by default. Each pair is "<namespace>/<caller service>><namespace>/<callee service>[:port]".
+podProbe:
+  enabled: false
+  pairs: []
+  #  - boutique/frontend>boutique/cartservice
+  #  - boutique/checkoutservice>boutique/paymentservice:50051
+
+rbac:
+  # The hub reads pods, services, endpoints and nodes (read-only) to know what to monitor.
+  create: true

@@ -1,0 +1,36 @@
+# Argus Hub: web UI + hub server in one image, built for any CPU architecture.
+#
+# The UI and the Go compiler always run on the machine that builds (BUILDPLATFORM) and
+# the Go compiler cross-compiles for the target, so a multi-arch build on an arm64 laptop
+# needs no CPU emulation. Build from the repository root:
+#   docker buildx build -f deploy/docker/Dockerfile.hub --platform linux/amd64,linux/arm64 -t <name> .
+
+FROM --platform=$BUILDPLATFORM node:22-alpine AS ui
+WORKDIR /src/internal/site
+COPY internal/site/package.json internal/site/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY internal/site/ ./
+RUN npm run build
+
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS build
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+COPY --from=ui /src/internal/site/dist ./internal/site/dist
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" -o /out/argus-hub ./internal/cmd/hub
+# Files the runtime image needs, prepared here so the final stage runs no command
+# (a RUN in the final stage would execute under emulation on a foreign architecture).
+RUN apk add --no-cache ca-certificates tzdata && mkdir /out/data
+
+FROM alpine:3.22
+COPY --from=build /etc/ssl/certs /etc/ssl/certs
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build --chown=10001:10001 /out/data /data
+COPY --from=build /out/argus-hub /argus-hub
+USER 10001
+EXPOSE 8090
+ENTRYPOINT ["/argus-hub"]
+CMD ["serve", "--http", "0.0.0.0:8090", "--dir", "/data"]

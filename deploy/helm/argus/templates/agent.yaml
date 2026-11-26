@@ -1,0 +1,91 @@
+{{- $caps := .Values.agent.capabilities | default list -}}
+{{- if .Values.podProbe.enabled }}{{- $caps = concat $caps (list "SYS_PTRACE" "SYS_ADMIN") | uniq -}}{{- end -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "argus.agentName" . }}
+  labels:
+    {{- include "argus.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
+spec:
+  selector:
+    matchLabels:
+      {{- include "argus.selector" . | nindent 6 }}
+      app.kubernetes.io/component: agent
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        {{- include "argus.labels" . | nindent 8 }}
+        app.kubernetes.io/component: agent
+    spec:
+      serviceAccountName: {{ include "argus.agentName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # Node-level view: the agent reads the node's network interfaces and the
+      # pod cgroups under /sys/fs/cgroup, so it shares the node network namespace.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: agent
+          image: "{{ .Values.image.agent.repository }}:{{ .Values.image.agent.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: HUB_URL
+              value: "http://{{ include "argus.hubName" . }}.{{ .Release.Namespace }}.svc:{{ .Values.hub.port }}"
+            - name: TOKEN
+              valueFrom: { secretKeyRef: { name: {{ include "argus.secretName" . }}, key: AGENT_TOKEN } }
+            - name: SYSTEM_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+            - name: LISTEN
+              value: {{ .Values.agent.listen | quote }}
+            - name: DATA_DIR
+              value: /var/lib/argus-agent
+            - name: HOST_PROC
+              value: /host/proc
+            - name: HOST_SYS
+              value: /host/sys
+            {{- range $key, $value := .Values.agent.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            {{- if .Values.podProbe.enabled }}
+            # Entering another Pod's network namespace is blocked by the default AppArmor profile.
+            appArmorProfile:
+              type: Unconfined
+            {{- end }}
+            capabilities:
+              drop: ["ALL"]
+              {{- with $caps }}
+              add:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          resources:
+            {{- toYaml .Values.agent.resources | nindent 12 }}
+          volumeMounts:
+            - { name: state, mountPath: /var/lib/argus-agent }
+            - { name: host-proc, mountPath: /host/proc, readOnly: true }
+            - { name: host-sys, mountPath: /host/sys, readOnly: true }
+      volumes:
+        - name: state
+          hostPath: { path: {{ .Values.agent.stateHostPath }}, type: DirectoryOrCreate }
+        - name: host-proc
+          hostPath: { path: /proc }
+        - name: host-sys
+          hostPath: { path: /sys }
+      {{- with .Values.agent.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.agent.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
