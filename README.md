@@ -58,6 +58,23 @@ A Service's status follows its incidents: no open incident is `UP`, a warning is
 
 You need a Kubernetes cluster with cgroup v2 nodes, `kubectl` access to it, and `helm` 3.8+. Nothing else: the images come from Docker Hub and the chart from the same place.
 
+**1. Check that the cluster has storage.** The Hub keeps accounts and incident history in a SQLite file on a volume, so it needs a default StorageClass. k3s ships one; a plain kubeadm cluster does not.
+
+```bash
+kubectl get storageclass          # one line should say "(default)"
+```
+
+If nothing says `(default)`, install [local-path-provisioner](https://github.com/rancher/local-path-provisioner) and mark it as the default:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+kubectl patch storageclass local-path -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+local-path stores the data on the node where the Hub runs, so do not shut that node down. To try Argus without any storage, skip this step and add `--set hub.persistence.enabled=false` to the install command below. Accounts and incident history are then lost whenever the Hub Pod restarts. Without storage the Hub stays `Pending` with "unbound immediate PersistentVolumeClaims".
+
+**2. Install.**
+
 ```bash
 helm install argus oci://registry-1.docker.io/seoulorigin/argus \
   -n argus --create-namespace \
@@ -80,8 +97,6 @@ helm upgrade argus oci://registry-1.docker.io/seoulorigin/argus -n argus --reset
 ```
 
 `helm upgrade` is never automatic: a running install keeps its version until you run it. `--reset-then-reuse-values` keeps the values you set at install time and still picks up defaults added by the new release. Chart and images share one version number, so upgrading the chart upgrades the images with it.
-
-> **Hub stays `Pending` with "unbound immediate PersistentVolumeClaims"?** The Hub keeps accounts and incident history in a SQLite file on a volume, and the cluster has no default StorageClass (k3s has one built in; a plain kubeadm cluster does not). Either install a provisioner such as [local-path-provisioner](https://github.com/rancher/local-path-provisioner), or try Argus without storage by adding `--set hub.persistence.enabled=false`. Without storage, accounts and incident history are lost whenever the Hub Pod restarts.
 
 ### Probing a Service differently
 

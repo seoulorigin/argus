@@ -58,6 +58,23 @@ Service 상태는 장애를 따라갑니다. 열린 장애가 없으면 `UP`, �
 
 cgroup v2 노드로 된 Kubernetes 클러스터, 그 클러스터에 접근할 수 있는 `kubectl`, `helm` 3.8 이상이 필요합니다. 그 외에는 필요 없습니다. 이미지와 차트를 모두 Docker Hub에서 받습니다.
 
+**1. 클러스터에 저장소가 있는지 확인합니다.** Hub는 계정과 장애 이력을 볼륨 위의 SQLite 파일에 저장하므로 기본 StorageClass가 필요합니다. k3s에는 내장되어 있고, 순정 kubeadm 클러스터에는 없습니다.
+
+```bash
+kubectl get storageclass          # 한 줄에 "(default)"가 있어야 함
+```
+
+`(default)`가 없으면 [local-path-provisioner](https://github.com/rancher/local-path-provisioner)를 설치하고 기본으로 지정합니다.
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+kubectl patch storageclass local-path -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+local-path는 Hub가 뜬 노드의 디스크에 데이터를 두므로, 그 노드는 끄지 마세요. 저장소 없이 먼저 써 보려면 이 단계를 건너뛰고 아래 설치 명령에 `--set hub.persistence.enabled=false`를 붙이세요. 이 경우 Hub Pod가 재시작될 때 계정과 장애 이력이 사라집니다. 저장소가 없으면 Hub가 "unbound immediate PersistentVolumeClaims"로 `Pending`에 머뭅니다.
+
+**2. 설치합니다.**
+
 ```bash
 helm install argus oci://registry-1.docker.io/seoulorigin/argus \
   -n argus --create-namespace \
@@ -80,8 +97,6 @@ helm upgrade argus oci://registry-1.docker.io/seoulorigin/argus -n argus --reset
 ```
 
 `helm upgrade`는 자동으로 실행되지 않습니다. 설치된 버전은 이 명령을 실행하기 전까지 그대로입니다. `--reset-then-reuse-values`는 설치할 때 지정한 값은 유지하면서 새 릴리스에 추가된 기본값은 반영합니다. 차트와 이미지는 같은 버전 번호를 쓰므로, 차트를 올리면 이미지도 함께 올라갑니다.
-
-> **Hub가 "unbound immediate PersistentVolumeClaims"로 `Pending`에 머무나요?** Hub는 계정과 장애 이력을 볼륨 위의 SQLite 파일에 저장하는데, 클러스터에 기본 StorageClass가 없는 경우입니다(k3s는 내장되어 있고, 순정 kubeadm 클러스터는 없습니다). [local-path-provisioner](https://github.com/rancher/local-path-provisioner) 같은 프로비저너를 설치하거나, 저장소 없이 먼저 써 보려면 `--set hub.persistence.enabled=false`를 붙이세요. 저장소 없이 쓰면 Hub Pod가 재시작될 때 계정과 장애 이력이 사라집니다.
 
 ### Service별 프로브 방식 바꾸기
 
