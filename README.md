@@ -59,7 +59,7 @@ A Service's status follows its incidents: no open incident is `UP`, a warning is
 You need a Kubernetes cluster with cgroup v2 nodes, `kubectl` access to it, and `helm` 3.8+. Nothing else: the images come from Docker Hub and the chart from the same place.
 
 ```bash
-helm install argus oci://registry-1.docker.io/seoulorigin/argus --version 0.1.0 \
+helm install argus oci://registry-1.docker.io/seoulorigin/argus \
   -n argus --create-namespace \
   --set hub.service.type=NodePort --set hub.service.nodePort=30090
 
@@ -70,6 +70,16 @@ kubectl -n argus get secret argus-argus-auth -o jsonpath='{.data.ADMIN_PASSWORD}
 Open `http://<any-node-ip>:30090`. Without a NodePort, use `kubectl -n argus port-forward svc/argus-argus-hub 8090:8090` and open `http://127.0.0.1:8090`. Both work from a laptop that reaches the cluster through a VPN and a kubeconfig; nothing needs to be installed on the cluster nodes.
 
 Agents register themselves: the chart creates one shared token, the Agent fetches the Hub's public key, and each node appears in the dashboard within about 15 seconds. Images are published for `linux/amd64` and `linux/arm64`, so mixed clusters work.
+
+### Upgrading
+
+Without `--version`, Helm installs the newest release. To stay on a specific one, add `--version <x.y.z>`. To move an existing install to the newest release:
+
+```bash
+helm upgrade argus oci://registry-1.docker.io/seoulorigin/argus -n argus --reset-then-reuse-values
+```
+
+`helm upgrade` is never automatic: a running install keeps its version until you run it. `--reset-then-reuse-values` keeps the values you set at install time and still picks up defaults added by the new release. Chart and images share one version number, so upgrading the chart upgrades the images with it.
 
 > **Hub stays `Pending` with "unbound immediate PersistentVolumeClaims"?** The Hub keeps accounts and incident history in a SQLite file on a volume, and the cluster has no default StorageClass (k3s has one built in; a plain kubeadm cluster does not). Either install a provisioner such as [local-path-provisioner](https://github.com/rancher/local-path-provisioner), or try Argus without storage by adding `--set hub.persistence.enabled=false`. Without storage, accounts and incident history are lost whenever the Hub Pod restarts.
 

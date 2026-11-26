@@ -59,7 +59,7 @@ Service 상태는 장애를 따라갑니다. 열린 장애가 없으면 `UP`, �
 cgroup v2 노드로 된 Kubernetes 클러스터, 그 클러스터에 접근할 수 있는 `kubectl`, `helm` 3.8 이상이 필요합니다. 그 외에는 필요 없습니다. 이미지와 차트를 모두 Docker Hub에서 받습니다.
 
 ```bash
-helm install argus oci://registry-1.docker.io/seoulorigin/argus --version 0.1.0 \
+helm install argus oci://registry-1.docker.io/seoulorigin/argus \
   -n argus --create-namespace \
   --set hub.service.type=NodePort --set hub.service.nodePort=30090
 
@@ -70,6 +70,16 @@ kubectl -n argus get secret argus-argus-auth -o jsonpath='{.data.ADMIN_PASSWORD}
 `http://<아무-노드-IP>:30090`으로 접속합니다. NodePort를 쓰지 않으면 `kubectl -n argus port-forward svc/argus-argus-hub 8090:8090` 후 `http://127.0.0.1:8090`으로 접속합니다. VPN과 kubeconfig로 클러스터에 닿는 노트북에서 그대로 쓸 수 있고, 클러스터 노드에 아무것도 따로 설치하지 않습니다.
 
 Agent는 스스로 등록합니다. 차트가 공용 토큰을 만들고, Agent가 Hub의 공개키를 받아 오며, 노드는 약 15초 안에 대시보드에 나타납니다. 이미지는 `linux/amd64`와 `linux/arm64`로 게시되어 있어서 아키텍처가 섞인 클러스터에서도 동작합니다.
+
+### 업그레이드
+
+`--version`을 생략하면 Helm이 가장 최신 릴리스를 설치합니다. 특정 버전에 머물려면 `--version <x.y.z>`를 붙이세요. 이미 설치한 것을 최신 릴리스로 올리려면 다음을 실행합니다.
+
+```bash
+helm upgrade argus oci://registry-1.docker.io/seoulorigin/argus -n argus --reset-then-reuse-values
+```
+
+`helm upgrade`는 자동으로 실행되지 않습니다. 설치된 버전은 이 명령을 실행하기 전까지 그대로입니다. `--reset-then-reuse-values`는 설치할 때 지정한 값은 유지하면서 새 릴리스에 추가된 기본값은 반영합니다. 차트와 이미지는 같은 버전 번호를 쓰므로, 차트를 올리면 이미지도 함께 올라갑니다.
 
 > **Hub가 "unbound immediate PersistentVolumeClaims"로 `Pending`에 머무나요?** Hub는 계정과 장애 이력을 볼륨 위의 SQLite 파일에 저장하는데, 클러스터에 기본 StorageClass가 없는 경우입니다(k3s는 내장되어 있고, 순정 kubeadm 클러스터는 없습니다). [local-path-provisioner](https://github.com/rancher/local-path-provisioner) 같은 프로비저너를 설치하거나, 저장소 없이 먼저 써 보려면 `--set hub.persistence.enabled=false`를 붙이세요. 저장소 없이 쓰면 Hub Pod가 재시작될 때 계정과 장애 이력이 사라집니다.
 
