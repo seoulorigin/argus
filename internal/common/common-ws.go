@@ -13,8 +13,6 @@ const (
 	GetData WebSocketAction = iota
 	// Check the fingerprint of the agent
 	CheckFingerprint
-	// Sync network monitor configuration to agent
-	SyncNetworkMonitors
 	// Add new actions here...
 )
 

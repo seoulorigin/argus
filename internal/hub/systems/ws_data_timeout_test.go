@@ -44,7 +44,7 @@ func TestFetchDataTimeoutKeepsWebSocketOpen(t *testing.T) {
 	t.Cleanup(func() { wsDataRequestTimeout = originalTimeout })
 
 	connections := make(chan *ws.WsConn, 1)
-	upgrader := gws.NewUpgrader(&monitorSyncServer{}, nil)
+	upgrader := gws.NewUpgrader(&idleWsServer{}, nil)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r)
 		if err != nil {
@@ -113,7 +113,7 @@ func TestUpdatePingsAgentAfterFailedFetch(t *testing.T) {
 	t.Cleanup(func() { wsDataRequestTimeout = originalTimeout })
 
 	connections := make(chan *ws.WsConn, 1)
-	upgrader := gws.NewUpgrader(&monitorSyncServer{}, nil)
+	upgrader := gws.NewUpgrader(&idleWsServer{}, nil)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r)
 		if err != nil {

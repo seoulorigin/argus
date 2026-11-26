@@ -7,6 +7,7 @@ import (
 
 	"argus/internal/common"
 	esystem "argus/internal/entities/system"
+	"argus/internal/hub/ws"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/lxzan/gws"
 
@@ -17,6 +18,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 )
+
+// idleWsServer is a gws event handler for tests that serve one WebSocket connection by hand.
+type idleWsServer struct{ ws.Handler }
+
+func (*idleWsServer) OnClose(*gws.Conn, error) {}
 
 // stubHub implements hubLike using a plain pocketbase test app, so DB tests can
 // run in-package without an import cycle to internal/hub (which imports this package).

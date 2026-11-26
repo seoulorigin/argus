@@ -5,7 +5,6 @@ import type {
 	ChartDataContainer,
 	ChartTimes,
 	ContainerStatsRecord,
-	NetworkMonitorStatsRecord,
 	SystemStatsRecord,
 } from "@/types"
 
@@ -51,7 +50,7 @@ export function appendData<T extends { created: string | number | null }>(
 	return result
 }
 
-export async function getStats<T extends SystemStatsRecord | ContainerStatsRecord | NetworkMonitorStatsRecord>(
+export async function getStats<T extends SystemStatsRecord | ContainerStatsRecord>(
 	collection: string,
 	systemId: string,
 	chartTime: ChartTimes,

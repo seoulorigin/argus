@@ -17,7 +17,7 @@ import (
 )
 
 func TestLongerRecordsPreventDuplicates(t *testing.T) {
-	for _, collection := range []string{"system_stats", "container_stats", "network_monitor_stats"} {
+	for _, collection := range []string{"system_stats", "container_stats"} {
 		for _, tier := range []struct {
 			shorter, longer string
 			count           int
@@ -50,20 +50,6 @@ func TestLongerRecordsPreventDuplicates(t *testing.T) {
 					data["stats"] = `{"cpu":10}`
 				case "container_stats":
 					data["stats"] = `[{"name":"test","cpu":10}]`
-				case "network_monitor_stats":
-					monitor, err := tests.CreateRecord(hub, "network_monitors", map[string]any{
-						"system": sys.Id, "target": "1.1.1.1", "protocol": "icmp",
-						"interval": 30, "enabled": true,
-					})
-					require.NoError(t, err)
-					data["monitor"] = monitor.Id
-					data["created"] = created.UnixMilli()
-					data["total_count"] = 1
-					data["success_count"] = 1
-					data["res_sum"] = 10
-					data["res_min"] = 10
-					data["res_max"] = 10
-					filter["monitor"] = monitor.Id
 				}
 				for range tier.count {
 					_, err := tests.CreateRecord(hub, collection, data)

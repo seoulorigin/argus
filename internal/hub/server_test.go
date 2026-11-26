@@ -20,7 +20,6 @@ func TestIsAppRoute(t *testing.T) {
 		{"/containers/", "/", true},
 		{"/Containers", "/", true},
 		{"/smart", "/", true},
-		{"/monitors", "/", true},
 		{"/forgot-password", "/", true},
 		{"/request-otp", "/", true},
 		{"/system/abc123", "/", true},

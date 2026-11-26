@@ -45,7 +45,6 @@ type Agent struct {
 	keys                      []gossh.PublicKey                                     // SSH public keys
 	podCollector              *podCollector                                         // Reads per-Pod usage from the node cgroup tree (nil off Kubernetes)
 	probes                    *probeRunner                                          // Probes the services the hub names
-	monitorManager            *MonitorManager                                       // Manages network monitors
 	lastHubRequest            atomic.Int64                                          // Wall clock Unix nanoseconds of the last hub stats request
 }
 
@@ -105,9 +104,6 @@ func NewAgent(dataDir ...string) (agent *Agent, err error) {
 	// initialize handler registry
 	agent.handlerRegistry = NewHandlerRegistry()
 
-	// initialize monitor manager
-	agent.monitorManager = newMonitorManager(agent)
-
 	// initialize net io stats
 	agent.initializeNetIoStats()
 
@@ -163,11 +159,6 @@ func (a *Agent) gatherStats(options common.DataRequestOptions) *system.CombinedD
 		if a.probes != nil {
 			data.Probes = a.probes.Drain()
 		}
-	}
-
-	if a.monitorManager != nil {
-		data.Monitors = a.monitorManager.GetResults(cacheTimeMs)
-		slog.Debug("Monitors", "data", data.Monitors)
 	}
 
 	a.cache.Set(data, cacheTimeMs)

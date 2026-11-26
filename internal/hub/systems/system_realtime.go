@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"argus/internal/common"
-	"argus/internal/entities/monitor"
 	"argus/internal/entities/system"
 	"argus/internal/hub/utils"
 	"ganigeorgiev.com/pocketbase/dbx"
@@ -206,20 +205,9 @@ func (sm *SystemManager) finishRealtimeFetch(fetch realtimeFetch) {
 	}
 }
 
-// marshalRealtimeData marshals combined agent data for a realtime broadcast, converting
-// the per-monitor results into the derived metric fields the frontend charts expect.
+// marshalRealtimeData marshals combined agent data for a realtime broadcast.
 func marshalRealtimeData(data *system.CombinedData) ([]byte, error) {
-	if len(data.Monitors) == 0 {
-		return json.Marshal(data)
-	}
-	monitorStats := make(map[string]monitor.Stats, len(data.Monitors))
-	for id, result := range data.Monitors {
-		monitorStats[id] = monitor.Stats{}.FromResult(result)
-	}
-	return json.Marshal(struct {
-		*system.CombinedData
-		Monitors map[string]monitor.Stats `json:"Monitors"`
-	}{data, monitorStats})
+	return json.Marshal(data)
 }
 
 // notify broadcasts realtime data to all clients subscribed to a specific subscription.

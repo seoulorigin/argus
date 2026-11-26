@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"argus/internal/entities/container"
-	"argus/internal/entities/monitor"
 	"argus/internal/entities/system"
 
 	"ganigeorgiev.com/pocketbase/dbx"
@@ -98,10 +97,6 @@ func (rm *RecordManager) CreateLongerRecords() {
 		if err != nil {
 			return err
 		}
-		monitorStatsColl, err := txApp.FindCachedCollectionByNameOrId("network_monitor_stats")
-		if err != nil {
-			return err
-		}
 		var systems RecordIds
 		db := txApp.DB()
 
@@ -182,66 +177,6 @@ func (rm *RecordManager) CreateLongerRecords() {
 			}
 		}
 
-		// network_monitor_stats is aggregated per monitor (not per system)
-		var monitors []struct {
-			Id     string `db:"id"`
-			System string `db:"system"`
-		}
-		// Disabled monitors still have history that must advance through retention tiers.
-		if err := db.NewQuery("SELECT id, system FROM network_monitors").All(&monitors); err != nil {
-			return err
-		}
-
-		for _, monitorRec := range monitors {
-			for i := range longerRecordData {
-				recordData := longerRecordData[i]
-				longerRecordPeriod := now.Add(recordData.longerTimeDuration + time.Minute)
-				shorterRecordPeriod := recordData.shorterRecordCutoff(now)
-
-				if recordData.longerType != "10m" {
-					count, err := txApp.CountRecords(monitorStatsColl.Id, dbx.NewExp(
-						"monitor={:monitor} AND type={:type} AND created>{:created}",
-						dbx.Params{
-							"monitor": monitorRec.Id,
-							"type":    recordData.longerType,
-							"created": longerRecordPeriod.UnixMilli(),
-						},
-					))
-					if err != nil {
-						return err
-					}
-					if count > 0 {
-						continue
-					}
-				}
-
-				stats, count, err := rm.AverageMonitorStats(db, monitorRec.Id, recordData.shorterType, shorterRecordPeriod.UnixMilli())
-				if err != nil {
-					txApp.Logger().Error("failed to average monitor stats", "monitor", monitorRec.Id, "err", err)
-					continue
-				}
-				// Monitor intervals can exceed the aggregation window, so average
-				// any available records at every level and skip only empty windows.
-				if count == 0 {
-					continue
-				}
-
-				longerRecord := core.NewRecord(monitorStatsColl)
-				longerRecord.Set("system", monitorRec.System)
-				longerRecord.Set("monitor", monitorRec.Id)
-				longerRecord.Set("type", recordData.longerType)
-				longerRecord.Set("created", now.UnixMilli())
-				longerRecord.Set("res_min", stats.ResMin)
-				longerRecord.Set("res_max", stats.ResMax)
-				longerRecord.Set("total_count", stats.TotalCount)
-				longerRecord.Set("success_count", stats.SuccessCount)
-				longerRecord.Set("res_sum", stats.ResponseSum)
-				if err := txApp.SaveNoValidate(longerRecord); err != nil {
-					txApp.Logger().Error("failed to save monitor longer record", "err", err)
-				}
-			}
-		}
-
 		return nil
 	})
 	if err != nil {
@@ -250,10 +185,6 @@ func (rm *RecordManager) CreateLongerRecords() {
 }
 
 func getCreatedTimeField(collectionName string, period time.Time) any {
-	// network_monitor_stats stores created as unix timestamp in ms, not as a date string
-	if collectionName == "network_monitor_stats" {
-		return period.UnixMilli()
-	}
 	return period.Format(types.DefaultDateLayout)
 }
 
@@ -420,36 +351,6 @@ func AverageContainerStatsSlice(records [][]container.Stats) []container.Stats {
 		})
 	}
 	return result
-}
-
-// AverageMonitorStats merges probe counts and response sums, preserving their
-// weights through every retention tier. Failed probes do not contribute latency.
-func (rm *RecordManager) AverageMonitorStats(db dbx.Builder, monitorID, recordType string, createdAfter int64) (monitor.Stats, int, error) {
-	var result struct {
-		monitor.Stats
-		Count int `db:"count"`
-	}
-	err := db.Select(
-		"COUNT(*) AS count",
-		"COALESCE(SUM(total_count), 0) AS total_count",
-		"COALESCE(SUM(success_count), 0) AS success_count",
-		"COALESCE(SUM(res_sum), 0) AS res_sum",
-		"COALESCE(MIN(CASE WHEN success_count > 0 THEN res_min END), 0) AS res_min",
-		"COALESCE(MAX(CASE WHEN success_count > 0 THEN res_max END), 0) AS res_max",
-	).From("network_monitor_stats").Where(dbx.NewExp(
-		"monitor={:monitor} AND type={:type} AND created>{:created}",
-		dbx.Params{"monitor": monitorID, "type": recordType, "created": createdAfter},
-	)).One(&result)
-	if err != nil {
-		return monitor.Stats{}, 0, err
-	}
-	if result.SuccessCount > 0 {
-		result.ResAvg = twoDecimals(float64(result.ResponseSum) / float64(result.SuccessCount))
-	}
-	if result.TotalCount > 0 {
-		result.Loss = twoDecimals(float64(result.TotalCount-result.SuccessCount) * 100 / float64(result.TotalCount))
-	}
-	return result.Stats, result.Count, nil
 }
 
 /* Round float to two decimals */

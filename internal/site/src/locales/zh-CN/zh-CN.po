@@ -30,11 +30,10 @@ msgstr ""
 msgid "{0} row(s)"
 msgstr ""
 
-#. placeholder {0}: selectedIds.size
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "{0} selected"
-msgstr ""
+#~ msgid "{0} selected"
+#~ msgstr ""
 
 #: src/components/routes/system/info-bar.tsx
 msgid "{cores, plural, one {# core} other {# cores}}"
@@ -53,8 +52,8 @@ msgid "{count, plural, one {{countString} minute} few {{countString} minutes} ma
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "{daysLeft, plural, one {# day} other {# days}}"
-msgstr ""
+#~ msgid "{daysLeft, plural, one {# day} other {# days}}"
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table-columns.tsx
 #~ msgid "{numFailed, plural, one {# failed service} other {# failed services}}"
@@ -101,23 +100,23 @@ msgid "above the {0} threshold"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Accepted status codes"
-msgstr ""
+#~ msgid "Accepted status codes"
+#~ msgstr ""
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Actions"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Add"
-msgstr ""
+#~ msgid "Add"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Add {foo}"
-msgstr ""
+#~ msgid "Add {foo}"
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Adjust display options for charts."
@@ -158,8 +157,8 @@ msgid "Are you sure you want to delete {name}?"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Are you sure?"
-msgstr ""
+#~ msgid "Are you sure?"
+#~ msgstr ""
 
 #: src/components/login/auth-form.tsx
 #~ msgid "Argus supports OpenID Connect and many OAuth2 authentication providers."
@@ -167,8 +166,8 @@ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Auto"
-msgstr ""
+#~ msgid "Auto"
+#~ msgstr ""
 
 #: src/components/copy-to-clipboard.tsx
 msgid "Automatic copy requires a secure context."
@@ -187,21 +186,21 @@ msgid "Average CPU utilization of Pods"
 msgstr ""
 
 #: src/components/routes/system/charts/monitors-charts.tsx
-msgid "Average response time"
-msgstr ""
+#~ msgid "Average response time"
+#~ msgstr ""
 
 #: src/components/routes/system/charts/cpu-charts.tsx
 msgid "Average system-wide CPU utilization"
 msgstr ""
 
 #: src/components/routes/system/charts/monitors-charts.tsx
-msgid "Average, minimum, and maximum response time"
-msgstr ""
+#~ msgid "Average, minimum, and maximum response time"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Avg 1h"
-msgstr ""
+#~ msgid "Avg 1h"
+#~ msgstr ""
 
 #: src/components/command-palette.tsx
 #: src/components/navbar.tsx
@@ -228,12 +227,12 @@ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Bulk Add"
-msgstr ""
+#~ msgid "Bulk Add"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Bulk Add {foo}"
-msgstr ""
+#~ msgid "Bulk Add {foo}"
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Bytes (KB/s, MB/s, GB/s)"
@@ -243,7 +242,6 @@ msgstr ""
 msgid "Cache / Buffers"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/system-actions-button.tsx
 msgid "Cancel"
 msgstr ""
@@ -262,16 +260,16 @@ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Certificate"
-msgstr ""
+#~ msgid "Certificate"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Certificate expired {expires}"
-msgstr ""
+#~ msgid "Certificate expired {expires}"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Certificate expires {expires}"
-msgstr ""
+#~ msgid "Certificate expires {expires}"
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 #~ msgid "Change display units for metrics."
@@ -303,28 +301,28 @@ msgid "Check logs for more details."
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Checks that an A record exists."
-msgstr ""
+#~ msgid "Checks that an A record exists."
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Checks that an AAAA record exists."
-msgstr ""
+#~ msgid "Checks that an AAAA record exists."
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Choose how network traffic is shown."
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Clear"
-msgstr ""
+#~ msgid "Clear"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Clear all"
-msgstr ""
+#~ msgid "Clear all"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Clear matches"
-msgstr ""
+#~ msgid "Clear matches"
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table.tsx
 #~ msgid "Click on a system to view more information."
@@ -344,16 +342,16 @@ msgid "Command line instructions"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Compare with other systems"
-msgstr ""
+#~ msgid "Compare with other systems"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Compare with other targets"
-msgstr ""
+#~ msgid "Compare with other targets"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Configure response monitoring from this agent."
-msgstr ""
+#~ msgid "Configure response monitoring from this agent."
+#~ msgstr ""
 
 #: src/components/login/auth-form.tsx
 #: src/components/login/auth-form.tsx
@@ -364,7 +362,6 @@ msgstr ""
 msgid "Connection lost"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/system-actions-button.tsx
 msgid "Continue"
 msgstr ""
@@ -374,8 +371,8 @@ msgid "Copied to clipboard"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Copy bulk config"
-msgstr ""
+#~ msgid "Copy bulk config"
+#~ msgstr ""
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgctxt "Environment variables"
@@ -458,7 +455,6 @@ msgstr ""
 msgid "Default time period"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/system-actions-button.tsx
 msgid "Delete"
 msgstr ""
@@ -490,8 +486,8 @@ msgid "Display, units and access for this Argus hub."
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "DNS Server"
-msgstr ""
+#~ msgid "DNS Server"
+#~ msgstr ""
 
 #: src/components/routes/system/charts/cpu-charts.tsx
 #~ msgid "Docker CPU Usage"
@@ -524,12 +520,12 @@ msgid "Download"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Edit"
-msgstr ""
+#~ msgid "Edit"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Edit {foo}"
-msgstr ""
+#~ msgid "Edit {foo}"
+#~ msgstr ""
 
 #: src/components/login/auth-form.tsx
 #: src/components/login/forgot-pass-form.tsx
@@ -543,8 +539,8 @@ msgid "Empty"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Enter a domain name to look up. Put the resolver's IP in DNS Server."
-msgstr ""
+#~ msgid "Enter a domain name to look up. Put the resolver's IP in DNS Server."
+#~ msgstr ""
 
 #: src/components/login/login.tsx
 msgid "Enter email address to reset password"
@@ -558,10 +554,6 @@ msgstr ""
 msgid "Ephemeral"
 msgstr ""
 
-#: src/components/network-monitors-table/monitor-dialog.tsx
-#: src/components/network-monitors-table/monitor-dialog.tsx
-#: src/components/network-monitors-table/network-monitors-table.tsx
-#: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/routes/settings/config-yaml.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Error"
@@ -572,8 +564,8 @@ msgid "Existing systems not defined in <0>config.yml</0> will be deleted. Please
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Expired"
-msgstr ""
+#~ msgid "Expired"
+#~ msgstr ""
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Expires after one hour or on hub restart."
@@ -600,18 +592,17 @@ msgid "Failed to authenticate"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Failed to delete monitors."
-msgstr ""
+#~ msgid "Failed to delete monitors."
+#~ msgstr ""
 
 #: src/components/routes/settings/layout.tsx
 msgid "Failed to save settings"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Failed to update monitors."
-msgstr ""
+#~ msgid "Failed to update monitors."
+#~ msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/routes/system/chart-card.tsx
 msgid "Filter..."
 msgstr ""
@@ -659,30 +650,30 @@ msgid "If you've lost the password to your admin account, you may reset it using
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Ignore TLS certificate errors"
-msgstr ""
+#~ msgid "Ignore TLS certificate errors"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Interval"
-msgstr ""
+#~ msgid "Interval"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Interval (seconds)"
-msgstr ""
+#~ msgid "Interval (seconds)"
+#~ msgstr ""
 
 #: src/components/login/auth-form.tsx
 msgid "Invalid email address."
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "IP"
-msgstr ""
+#~ msgid "IP"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "IP Version"
-msgstr ""
+#~ msgid "IP Version"
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Language"
@@ -744,14 +735,14 @@ msgid "Logs"
 msgstr ""
 
 #: src/components/routes/system/charts/monitors-charts.tsx
-msgctxt "Packet loss"
-msgid "Loss"
-msgstr ""
+#~ msgctxt "Packet loss"
+#~ msgid "Loss"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Loss 1h"
-msgstr ""
+#~ msgid "Loss 1h"
+#~ msgstr ""
 
 #: src/components/routes/settings/layout.tsx
 #~ msgid "Manage display and notification preferences."
@@ -764,8 +755,8 @@ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Max 1h"
-msgstr ""
+#~ msgid "Max 1h"
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 #: src/components/routes/overview/overview.tsx
@@ -787,14 +778,14 @@ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Min 1h"
-msgstr ""
+#~ msgid "Min 1h"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Monitor"
-msgstr ""
+#~ msgid "Monitor"
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 #: src/components/routes/overview/overview.tsx
@@ -802,8 +793,8 @@ msgid "Monitoring Overview"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Monitors created"
-msgstr ""
+#~ msgid "Monitors created"
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table-columns.tsx
 #~ msgid "Net"
@@ -811,8 +802,8 @@ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Network Monitor"
-msgstr ""
+#~ msgid "Network Monitor"
+#~ msgstr ""
 
 #: src/components/command-palette.tsx
 #: src/components/navbar.tsx
@@ -821,8 +812,8 @@ msgstr ""
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/routes/monitors.tsx
-msgid "Network Monitors"
-msgstr ""
+#~ msgid "Network Monitors"
+#~ msgstr ""
 
 #: src/components/routes/system/charts/network-charts.tsx
 #~ msgid "Network traffic of containers"
@@ -873,20 +864,20 @@ msgid "No results found."
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "No results."
-msgstr ""
+#~ msgid "No results."
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 msgid "No services in the selected namespaces"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "No systems found."
-msgstr ""
+#~ msgid "No systems found."
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "No targets found."
-msgstr ""
+#~ msgid "No targets found."
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 msgid "nodes"
@@ -924,19 +915,18 @@ msgstr ""
 msgid "open"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
 #: src/components/system-actions-button.tsx
 msgid "Open menu"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Optional. Defaults to any status code below 400."
-msgstr ""
+#~ msgid "Optional. Defaults to any status code below 400."
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Optional. Defaults to the agent's system resolver."
-msgstr ""
+#~ msgid "Optional. Defaults to the agent's system resolver."
+#~ msgstr ""
 
 #: src/components/login/auth-form.tsx
 msgid "Or continue with"
@@ -947,10 +937,9 @@ msgid "Other"
 msgstr ""
 
 #: src/components/routes/system/charts/monitors-charts.tsx
-msgid "Packet loss (%)"
-msgstr ""
+#~ msgid "Packet loss (%)"
+#~ msgstr ""
 
-#: src/components/command-palette.tsx
 #: src/components/command-palette.tsx
 msgid "Page"
 msgstr ""
@@ -986,7 +975,6 @@ msgstr ""
 msgid "Password reset request received"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/system-actions-button.tsx
 msgid "Pause"
 msgstr ""
@@ -1062,8 +1050,8 @@ msgid "Pod Network I/O"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Port"
-msgstr ""
+#~ msgid "Port"
+#~ msgstr ""
 
 #: src/components/routes/system/charts/memory-charts.tsx
 msgid "Precise utilization at the recorded time"
@@ -1076,8 +1064,8 @@ msgstr ""
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Protocol"
-msgstr ""
+#~ msgid "Protocol"
+#~ msgstr ""
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Public key"
@@ -1123,8 +1111,8 @@ msgstr ""
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/routes/system/charts/monitors-charts.tsx
 #: src/components/routes/system/charts/monitors-charts.tsx
-msgid "Response"
-msgstr ""
+#~ msgid "Response"
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 msgid "Response p95"
@@ -1139,10 +1127,9 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Response time monitoring from agents."
-msgstr ""
+#~ msgid "Response time monitoring from agents."
+#~ msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/system-actions-button.tsx
 msgid "Resume"
 msgstr ""
@@ -1170,8 +1157,8 @@ msgid "rule"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Save {foo}"
-msgstr ""
+#~ msgid "Save {foo}"
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Save Settings"
@@ -1190,12 +1177,12 @@ msgid "Search for systems or settings..."
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Search systems"
-msgstr ""
+#~ msgid "Search systems"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Search targets"
-msgstr ""
+#~ msgid "Search targets"
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 #~ msgid "Select a service"
@@ -1206,29 +1193,29 @@ msgid "Select a service or node"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Select a system"
-msgstr ""
+#~ msgid "Select a system"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Select all"
-msgstr ""
+#~ msgid "Select all"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Select matches"
-msgstr ""
+#~ msgid "Select matches"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Select row"
-msgstr ""
+#~ msgid "Select row"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Select systems"
-msgstr ""
+#~ msgid "Select systems"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Select targets"
-msgstr ""
+#~ msgid "Select targets"
+#~ msgstr ""
 
 #: src/components/routes/system/charts/network-charts.tsx
 msgid "Sent"
@@ -1277,8 +1264,8 @@ msgid "SMTP settings"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Sort By"
-msgstr ""
+#~ msgid "Sort By"
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table.tsx
 #~ msgid "Status"
@@ -1301,9 +1288,6 @@ msgstr ""
 msgid "Switch theme"
 msgstr ""
 
-#: src/components/network-monitors-table/monitor-dialog.tsx
-#: src/components/network-monitors-table/network-monitors-columns.tsx
-#: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "System"
 msgstr ""
@@ -1313,8 +1297,6 @@ msgid "System load averages over time"
 msgstr ""
 
 #: src/components/navbar.tsx
-#: src/components/network-monitors-table/monitor-dialog.tsx
-#: src/components/network-monitors-table/monitor-dialog.tsx
 msgid "Systems"
 msgstr ""
 
@@ -1334,13 +1316,13 @@ msgstr ""
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Target"
-msgstr ""
+#~ msgid "Target"
+#~ msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "target[,protocol[,port[,interval[,server[,ipv4|ipv6]]]]]"
-msgstr ""
+#~ msgid "target[,protocol[,port[,interval[,server[,ipv4|ipv6]]]]]"
+#~ msgstr ""
 
 #. Temperature label in systems table
 #: src/components/systems-table/systems-table-columns.tsx
@@ -1360,8 +1342,8 @@ msgid "This action cannot be undone. This will permanently delete all current re
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "This will permanently delete all selected records from the database."
-msgstr ""
+#~ msgid "This will permanently delete all selected records from the database."
+#~ msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Time format"
@@ -1441,8 +1423,8 @@ msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-columns.tsx
 #: src/components/network-monitors-table/network-monitors-columns.tsx
-msgid "Updated"
-msgstr ""
+#~ msgid "Updated"
+#~ msgstr ""
 
 #: src/components/routes/overview/overview.tsx
 msgid "Updated {age} sec ago"
@@ -1465,8 +1447,8 @@ msgid "Usage"
 msgstr ""
 
 #: src/components/network-monitors-table/monitor-dialog.tsx
-msgid "Use for self-signed certificates."
-msgstr ""
+#~ msgid "Use for self-signed certificates."
+#~ msgstr ""
 
 #: src/components/routes/system/charts/memory-charts.tsx
 #: src/components/routes/system/charts/memory-charts.tsx
@@ -1482,7 +1464,6 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
-#: src/components/network-monitors-table/network-monitors-table.tsx
 #: src/components/routes/system/info-bar.tsx
 msgid "View"
 msgstr ""
@@ -1493,8 +1474,8 @@ msgid "View more"
 msgstr ""
 
 #: src/components/network-monitors-table/network-monitors-table.tsx
-msgid "Visible Fields"
-msgstr ""
+#~ msgid "Visible Fields"
+#~ msgstr ""
 
 #: src/components/charts/chart-no-values.tsx
 #: src/components/routes/system/chart-card.tsx

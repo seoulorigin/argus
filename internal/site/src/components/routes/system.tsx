@@ -4,9 +4,7 @@ import { useSystemData } from "./system/use-system-data"
 import { CpuChart, ContainerCpuChart } from "./system/charts/cpu-charts"
 import { MemoryChart, ContainerMemoryChart, SwapChart } from "./system/charts/memory-charts"
 import { BandwidthChart, ContainerNetworkChart } from "./system/charts/network-charts"
-import { LazyNetworkMonitorsTable } from "./system/lazy-tables"
 import { LoadAverageChart } from "./system/charts/load-average-chart"
-import { supportsNetworkMonitors } from "@/lib/utils"
 
 export default memo(function SystemDetail({ id }: { id: string }) {
 	const systemData = useSystemData(id)
@@ -33,7 +31,6 @@ export default memo(function SystemDetail({ id }: { id: string }) {
 	}
 
 	const hasContainers = containerData.length > 0
-	const hasNetworkMonitors = supportsNetworkMonitors(system)
 	const coreProps = { chartData, grid, dataEmpty, showMax, isLongerChart, maxValues }
 
 	return (
@@ -81,7 +78,6 @@ export default memo(function SystemDetail({ id }: { id: string }) {
 				<SwapChart chartData={chartData} grid={grid} dataEmpty={dataEmpty} systemStats={systemStats} />
 				<LoadAverageChart chartData={chartData} grid={grid} dataEmpty={dataEmpty} />
 			</div>
-			{hasNetworkMonitors && <LazyNetworkMonitorsTable systemId={system.id} />}
 		</div>
 	)
 })
