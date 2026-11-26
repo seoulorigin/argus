@@ -406,9 +406,6 @@ export interface UserSettings {
 	statusFilter?: "all" | "up" | "down" | "paused" | "pending"
 	viewMode?: "table" | "grid"
 	sortMode?: Array<{ id: string; desc: boolean }>
-	monitorCols?: Record<string, boolean>
-	monitorSortMode?: Array<{ id: string; desc: boolean }>
-	monitorSortModeSystem?: Array<{ id: string; desc: boolean }>
 	grid?: boolean
 	displayMode?: "default" | "tabs"
 }
@@ -684,69 +681,4 @@ export interface ArgusInfo {
 export interface UpdateInfo {
 	v: string // new version
 	url: string // url to new version
-}
-
-export interface NetworkMonitorRecord {
-	id: string
-	system: string
-	target: string
-	protocol: "icmp" | "tcp" | "http" | "dns"
-	port: number
-	server: string
-	/** Skip TLS certificate verification for HTTPS targets. */
-	skipTlsVerify: boolean
-	/** Address family the agent probes over: 0 (auto), 4 (IPv4), or 6 (IPv6). */
-	ipVersion: 0 | 4 | 6
-	/** Accepted HTTP status codes and ranges, such as "200-299,401". Empty means any status below 400. */
-	statusCodes: string
-	res: number
-	resMin1h: number
-	resMax1h: number
-	resAvg1h: number
-	loss: number
-	loss1h: number
-	interval: number
-	enabled: boolean
-	/** Latest TLS certificate details, reported for HTTPS targets. */
-	certInfo?: MonitorCertInfo | null
-	updated: string
-}
-
-/** Leaf TLS certificate details reported by the agent. Timestamps are Unix milliseconds. */
-export interface MonitorCertInfo {
-	expires: number
-	issuer?: string
-}
-
-/** Response times in microseconds and packet loss percentage (0-100). */
-export interface MonitorStats {
-	/** null when no probe succeeded, so there is no response time */
-	res_avg: number | null
-	res_min: number | null
-	res_max: number | null
-	loss: number
-}
-
-/** Raw per-monitor record stored in the DB. */
-export interface RawMonitorStatsRecord {
-	res_min: number
-	res_max: number
-	total_count: number
-	success_count: number
-	res_sum: number
-	id?: string
-	type?: string
-	monitor: string
-	created: number // unix timestamp (ms)
-}
-
-/**
- * Merged stats record keyed by monitor ID, used by chart components.
- * Constructed from multiple RawMonitorStatsRecord entries sharing the same timestamp.
- */
-export interface NetworkMonitorStatsRecord {
-	id?: string
-	type?: string
-	stats: Record<string, MonitorStats>
-	created: number // unix timestamp (ms) for Recharts xAxis
 }

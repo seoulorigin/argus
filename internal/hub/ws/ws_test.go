@@ -186,7 +186,6 @@ func TestCommonActions(t *testing.T) {
 	// Test that the actions we use exist and have expected values
 	assert.Equal(t, common.WebSocketAction(0), common.GetData, "GetData should be action 0")
 	assert.Equal(t, common.WebSocketAction(1), common.CheckFingerprint, "CheckFingerprint should be action 1")
-	assert.Equal(t, common.WebSocketAction(2), common.SyncNetworkMonitors, "SyncNetworkMonitors should be action 2")
 }
 
 func TestFingerprintHandler(t *testing.T) {

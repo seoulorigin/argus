@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"argus/internal/common"
-	"argus/internal/entities/monitor"
 	"argus/internal/entities/system"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/lxzan/gws"
@@ -48,7 +47,6 @@ func NewHandlerRegistry() *HandlerRegistry {
 
 	registry.Register(common.GetData, &GetDataHandler{})
 	registry.Register(common.CheckFingerprint, &CheckFingerprintHandler{})
-	registry.Register(common.SyncNetworkMonitors, &SyncNetworkMonitorsHandler{})
 
 	return registry
 }
@@ -109,22 +107,4 @@ type CheckFingerprintHandler struct{}
 
 func (h *CheckFingerprintHandler) Handle(hctx *HandlerContext) error {
 	return hctx.Client.handleAuthChallenge(hctx.Request, hctx.RequestID, hctx.Conn)
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-// SyncNetworkMonitorsHandler handles monitor configuration sync from hub
-type SyncNetworkMonitorsHandler struct{}
-
-func (h *SyncNetworkMonitorsHandler) Handle(hctx *HandlerContext) error {
-	var req monitor.SyncRequest
-	if err := cbor.Unmarshal(hctx.Request.Data, &req); err != nil {
-		return err
-	}
-	resp, err := hctx.Agent.monitorManager.HandleSyncRequest(req)
-	if err != nil {
-		return err
-	}
-	return hctx.SendResponse(resp, hctx.RequestID)
 }

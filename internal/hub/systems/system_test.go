@@ -34,7 +34,7 @@ func TestSSHDisabledSkipsSSHFallback(t *testing.T) {
 	sys := &System{}
 
 	var result string
-	err := sys.request(context.Background(), common.SyncNetworkMonitors, nil, &result)
+	err := sys.request(context.Background(), common.GetData, nil, &result)
 	require.ErrorIs(t, err, errSSHDisabled)
 
 	_, err = sys.fetchDataFromAgent(common.DataRequestOptions{})

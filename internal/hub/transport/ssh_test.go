@@ -176,7 +176,7 @@ func TestSSHRequestCancellation(t *testing.T) {
 				defer cancel()
 				done := make(chan error, 1)
 				result := "unchanged"
-				go func() { done <- transport.RequestWithRetry(ctx, common.SyncNetworkMonitors, req, &result, 1) }()
+				go func() { done <- transport.RequestWithRetry(ctx, common.GetData, req, &result, 1) }()
 				select {
 				case <-reached:
 				case <-time.After(2 * time.Second):
@@ -200,7 +200,7 @@ func TestSSHRequestCancellation(t *testing.T) {
 				case <-time.After(time.Second):
 					t.Fatal("cancelled request left its connection open")
 				}
-				require.NoError(t, transport.Request(t.Context(), common.SyncNetworkMonitors, nil, &result))
+				require.NoError(t, transport.Request(t.Context(), common.GetData, nil, &result))
 				require.Equal(t, "control response", result)
 			})
 		}
@@ -213,7 +213,7 @@ func TestSSHSessionTimeout(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
 	defer cancel()
 	var result string
-	require.ErrorIs(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result), context.DeadlineExceeded)
+	require.ErrorIs(t, transport.Request(ctx, common.GetData, nil, &result), context.DeadlineExceeded)
 	require.NoError(t, ctx.Err(), "the session timeout must fire before the caller's deadline")
 	require.False(t, transport.IsConnected())
 }
@@ -223,7 +223,7 @@ func TestSSHRequestAlreadyCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 	var result string
-	require.ErrorIs(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result), context.Canceled)
+	require.ErrorIs(t, transport.Request(ctx, common.GetData, nil, &result), context.Canceled)
 }
 
 func TestSSHSlowResponse(t *testing.T) {
@@ -232,7 +232,7 @@ func TestSSHSlowResponse(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
 	defer cancel()
 	var result string
-	require.NoError(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result))
+	require.NoError(t, transport.Request(ctx, common.GetData, nil, &result))
 	require.Equal(t, "control response", result, "session timeout must not shorten the request deadline")
 }
 
@@ -244,7 +244,7 @@ func TestSSHConcurrentRequests(t *testing.T) {
 			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
 			defer cancel()
 			var result string
-			if err := transport.Request(ctx, common.SyncNetworkMonitors, nil, &result); err != nil {
+			if err := transport.Request(ctx, common.GetData, nil, &result); err != nil {
 				t.Error(err)
 			} else if result != "control response" {
 				t.Errorf("unexpected response %q", result)
@@ -256,14 +256,14 @@ func TestSSHConcurrentRequests(t *testing.T) {
 	require.NotNil(t, client)
 	ctx, cancel := context.WithCancel(t.Context())
 	var result string
-	require.NoError(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result))
+	require.NoError(t, transport.Request(ctx, common.GetData, nil, &result))
 	cancel()
 	// Cancelling a completed request must not close the reused connection.
-	require.NoError(t, transport.Request(t.Context(), common.SyncNetworkMonitors, nil, &result))
+	require.NoError(t, transport.Request(t.Context(), common.GetData, nil, &result))
 	require.Same(t, client, transport.GetClient())
 	// The existing retry contract still replaces an unusable connection.
 	require.NoError(t, client.Close())
-	require.NoError(t, transport.RequestWithRetry(t.Context(), common.SyncNetworkMonitors, nil, &result, 1))
+	require.NoError(t, transport.RequestWithRetry(t.Context(), common.GetData, nil, &result, 1))
 	require.NotSame(t, client, transport.GetClient())
 }
 
@@ -283,7 +283,7 @@ func TestSSHCancelledSharedConnection(t *testing.T) {
 	defer cancelRequest()
 	done := make(chan error, 1)
 	var result string
-	go func() { done <- transport.Request(requestCtx, common.SyncNetworkMonitors, nil, &result) }()
+	go func() { done <- transport.Request(requestCtx, common.GetData, nil, &result) }()
 	select {
 	case <-reached:
 	case <-ctx.Done():
@@ -302,13 +302,13 @@ func TestSSHCancelledSharedConnection(t *testing.T) {
 	case <-ctx.Done():
 		t.Fatal("concurrent session remained blocked")
 	}
-	require.NoError(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result))
+	require.NoError(t, transport.Request(ctx, common.GetData, nil, &result))
 	replacement := transport.GetClient()
 	require.NotSame(t, client, replacement)
 	// Late cleanup of the old connection must not discard its replacement.
 	transport.CloseClient(client)
 	require.Same(t, replacement, transport.GetClient())
-	require.NoError(t, transport.Request(ctx, common.SyncNetworkMonitors, nil, &result))
+	require.NoError(t, transport.Request(ctx, common.GetData, nil, &result))
 }
 
 func TestConnectInitializesBeforePublishing(t *testing.T) {

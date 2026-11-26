@@ -92,9 +92,6 @@ export const $containerFilter = atom("")
 /** Temperature chart filter */
 export const $temperatureFilter = atom("")
 
-/** Filter for network monitor charts (compare page and per-system monitor charts) */
-export const $monitorFilter = atom("")
-
 /** Fan-speed chart filter */
 export const $fanFilter = atom("")
 

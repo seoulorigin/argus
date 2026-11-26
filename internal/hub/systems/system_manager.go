@@ -9,7 +9,6 @@ import (
 
 	"argus/internal/hub/ws"
 
-	"argus/internal/entities/monitor"
 	"argus/internal/entities/probe"
 	"argus/internal/entities/system"
 
@@ -17,7 +16,6 @@ import (
 
 	"argus"
 
-	"ganigeorgiev.com/pocketbase/dbx"
 	"ganigeorgiev.com/pocketbase/pocketbase/core"
 	"ganigeorgiev.com/pocketbase/pocketbase/tools/store"
 	"github.com/blang/semver"
@@ -328,26 +326,12 @@ func (sm *SystemManager) AddWebSocketSystem(systemId string, agentVersion semver
 	system := sm.NewSystem(systemId)
 	system.WsConn = wsConn
 	system.setAgentVersion(agentVersion)
-	system.monitorsNeedSync.Store(true)
 
 	if err := sm.AddRecord(systemRecord, system); err != nil {
 		return err
 	}
 
-	// Sync network monitors to the newly connected agent
-	go system.syncPendingNetworkMonitors()
-
 	return nil
-}
-
-// GetMonitorConfigsForSystem returns all enabled monitor configs for a system.
-func (sm *SystemManager) GetMonitorConfigsForSystem(systemID string) ([]monitor.Config, error) {
-	var configs []monitor.Config
-	err := sm.hub.DB().
-		NewQuery("SELECT id, target, protocol, port, interval, server, skipTlsVerify, ipVersion, statusCodes FROM network_monitors WHERE system = {:system} AND enabled = true").
-		Bind(dbx.Params{"system": systemID}).
-		All(&configs)
-	return configs, err
 }
 
 // createSSHClientConfig initializes the SSH client configuration for connecting to an agent's server

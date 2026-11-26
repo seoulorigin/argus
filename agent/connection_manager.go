@@ -236,7 +236,6 @@ func (c *ConnectionManager) handleSSHChange() {
 // stop closes active connections after the manager and reconnect attempts finish.
 func (c *ConnectionManager) stop() error {
 	_ = c.agent.StopServer()
-	c.agent.monitorManager.Stop()
 	c.closeWebSocket()
 	return health.CleanUp()
 }
